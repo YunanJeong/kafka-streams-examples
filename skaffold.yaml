@@ -3,10 +3,12 @@ kind: Config
 
 build: 
   artifacts:
-  - image: kse-producer
-    context: producer
+  - image: kse-producer  # 이미지 이름 태그포함 가능
+    context: producer    # Docker 빌드시 필요파일이 있는 디렉토리
   - image: kse-filterkey
-    context: filterkey
+    context: apps/filterkey
+  #- image: kse-my-first-streams
+  #  context: apps/my_first_streams
 
 deploy: 
   helm:
@@ -18,16 +20,34 @@ deploy:
         producer.image.registry: '{{ .IMAGE_DOMAIN_kse_producer }}'
         producer.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_producer }}'
         producer.image.tag: '{{ .IMAGE_TAG_kse_producer }}'
-        filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
-        filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
-        filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
-
+        
+      #valueFiles:
 profiles:
-- name: filterkey 
-  patches: 
-  - op: add 
-    path: /deploy/helm/releases/0/valuesFiles 
-    value: 
-    - configs/filterkey.yaml
+  - name: filterkey 
+    patches: 
+      - op: add 
+        path: /deploy/helm/releases/0/valuesFiles 
+        value: 
+          - configs/filterkey.yaml
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates
+        value:
+          filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
+          filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
+          filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
+  
+  # my_first_streams 프로파일 참조하여 실행시, parser.yaml을 helm value파일로 쓴다.
+  - name: my_first_streams
+    patches:
+      - op: add
+        path: /deploy/helm/releases/0/valuesFiles
+        value:
+          - configs/my_first_streams.yaml
+      - op: add
+        path: /deploy/helm/releases/0/setValueTemplates
+        value:
+          filterkey.image.registry: '{{ .IMAGE_DOMAIN_kse_filterkey }}'
+          filterkey.image.repository: '{{ .IMAGE_REPO_NO_DOMAIN_kse_filterkey }}'
+          filterkey.image.tag: '{{ .IMAGE_TAG_kse_filterkey }}'
 
   

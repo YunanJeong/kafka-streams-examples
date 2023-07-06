@@ -1,0 +1,26 @@
+
+# 카프카 설정
+kafka: 
+  # 토픽 기본 파티션 수
+  numPartitions: 2
+  srcTopic: my-first-streams-src  
+  sinkTopic: my-first-streams-sink
+
+# 로그 생성기 설정
+producer:
+  enabled: true
+  image:
+    registry: ""
+    repository: "library/kse-producer"
+    tag: 0.0.1
+  # 로그 생성 타입
+  type: my-first-streams
+
+# filterkey 예제 설정 
+filterkey:
+  # 파드 수
+  replicas: 1
+  image:
+    registry: ""
+    repository: "library/kse-my-first-streams"
+    tag: 0.0.1
